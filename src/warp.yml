@@ -1,0 +1,22 @@
+gui:
+  title: '&8&l워프'
+  size: 9
+warps:
+  mine:
+    name: '&6&l채집 월드'
+    material: COAL_ORE
+    world: 'Evita2'
+    x: -395.5
+    y: 11.0
+    z: 503.5
+    yaw: -90.0
+    pitch: 0.0
+  tutorial:
+    name: '&6&l튜토리얼'
+    material: BOOK
+    world: 'Tutorial'
+    x: -59.5
+    y: 66
+    z: 188.5
+    yaw: -90.0
+    pitch: 0.0

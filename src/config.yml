@@ -1,0 +1,16 @@
+ram:
+  minimum: 1024
+  maximum: 1024
+db:
+  user: 'root'
+  password: '189#$xD587%'
+  host: 'localhost'
+  port: '3306'
+  dbname: 'evita'
+  useSSL: false
+globalchannel: '전체'
+worlds:
+  - Archive
+  - Head World
+mineworlds: Evita2
+acrespawn: false

@@ -1,0 +1,50 @@
+main: com.tistory.hornslied.evitaonline.core.EvitaCoreMain
+name: EvitaCore
+version: 1.0
+author: Ludwig Hornslied
+depend: [Vault, Towny, TownyChat, Citizens, ProtocolLib]
+commands:
+  evitacore:
+    aliases: [에비타코어]
+  item:
+    aliases: [아이템]
+  help:
+    aliases: [?, 도움말]
+  spawn:
+    aliases: [스폰]
+  kit:
+    aliases: [기본셋, 기본세트]
+  restart:
+    aliases: [재시작]
+  say:
+    aliases: [alert, 알림]
+  whisper:
+    aliases: [w, message, m, tell, msg, t, 메시지, 귓속말]
+  reply:
+    aliases: [r, 대답, 답장]
+  playtime:
+    aliases: [플레이시간, 플레이타임]
+  ping:
+    aliases: [핑]
+  skull:
+    aliases: [머리]
+  world:
+    aliases: [월드]
+  tp:
+    aliases: [티피, 텔레포트]
+  call:
+    aliases: [tphere, 호출]
+  flyspeed:
+    aliases: [날기속도]
+  walkspeed:
+    aliases: [걷기속도]
+  currentspeed:
+    aliases: [현재속도]
+  tppos:
+    aliases: [좌표이동]
+  cafe:
+    aliases: [카페]
+  discord:
+    aliases: [디코, 디스코드]
+  wiki:
+    aliases: [위키]
