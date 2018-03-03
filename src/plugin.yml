@@ -2,20 +2,20 @@ main: com.tistory.hornslied.evitaonline.core.EvitaCoreMain
 name: EvitaCore
 version: 1.0
 author: Ludwig Hornslied
-depend: [Vault, Towny, TownyChat, Citizens, ProtocolLib]
+depend: [Vault, Towny, TownyChat, Citizens, ProtocolLib, Votifier, WGRegionEvents, WorldGuard]
 commands:
   evitacore:
     aliases: [에비타코어]
   item:
     aliases: [아이템]
   help:
-    aliases: [?, 도움말]
+    aliases: [?, 도움말, 명령어, command]
+  map:
+    aliases: [맵, 지도, 웹지도]
   spawn:
     aliases: [스폰]
   kit:
     aliases: [기본셋, 기본세트]
-  restart:
-    aliases: [재시작]
   say:
     aliases: [alert, 알림]
   whisper:
@@ -48,3 +48,5 @@ commands:
     aliases: [디코, 디스코드]
   wiki:
     aliases: [위키]
+  vote:
+    aliases: [추천]

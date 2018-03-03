@@ -11,6 +11,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -21,22 +22,18 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.palmergames.bukkit.TownyChat.channels.Channel;
-import com.tistory.hornslied.evitaonline.commands.AdminUtilCommand;
-import com.tistory.hornslied.evitaonline.commands.EvitaCoreCommand;
-import com.tistory.hornslied.evitaonline.commands.ItemCommand;
-import com.tistory.hornslied.evitaonline.commands.UserUtilCommand;
+import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
+import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.TownyUniverse;
+import com.tistory.hornslied.evitaonline.commands.*;
 import com.tistory.hornslied.evitaonline.db.DB;
 import com.tistory.hornslied.evitaonline.events.EvitaCloseEvent;
-import com.tistory.hornslied.evitaonline.listeners.ChatListener;
-import com.tistory.hornslied.evitaonline.listeners.DeathListener;
-import com.tistory.hornslied.evitaonline.listeners.FarmListener;
-import com.tistory.hornslied.evitaonline.listeners.JoinListener;
-import com.tistory.hornslied.evitaonline.listeners.RespawnListener;
-import com.tistory.hornslied.evitaonline.listeners.TablistNameUpdater;
-import com.tistory.hornslied.evitaonline.play.NoticeManager;
-import com.tistory.hornslied.evitaonline.play.PlayManager;
+import com.tistory.hornslied.evitaonline.item.ItemManager;
+import com.tistory.hornslied.evitaonline.listeners.*;
+import com.tistory.hornslied.evitaonline.play.*;
 import com.tistory.hornslied.evitaonline.warp.WarpManager;
 import com.tistory.hornslied.evitaonline.warp.WarpTrait;
 
@@ -52,6 +49,7 @@ public class EvitaCoreMain extends JavaPlugin {
 	private FileConfiguration config;
 	private FileConfiguration messages;
 	private FileConfiguration warp;
+	private FileConfiguration items;
 
 	private DB db;
 
@@ -75,6 +73,7 @@ public class EvitaCoreMain extends JavaPlugin {
 		PlayManager.getInstance();
 		NoticeManager.getInstance();
 		WarpManager.getInstance();
+		ItemManager.getInstance();
 
 		registerTraits();
 		registerListeners();
@@ -95,10 +94,14 @@ public class EvitaCoreMain extends JavaPlugin {
 		if (!(new File(getDataFolder(), "messages.yml").exists()))
 			saveResource("messages.yml", false);
 		messages = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "messages.yml"));
-		
+
 		if (!(new File(getDataFolder(), "warp.yml").exists()))
 			saveResource("warp.yml", false);
 		warp = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "warp.yml"));
+
+		if (!(new File(getDataFolder(), "items.yml").exists()))
+			saveResource("items.yml", false);
+		items = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "items.yml"));
 	}
 
 	private void loadWorlds() {
@@ -159,10 +162,10 @@ public class EvitaCoreMain extends JavaPlugin {
 		generalChannel = townyChat.getChannelsHandler().getChannel(config.getString("globalchannel"));
 		return townyChat != null;
 	}
-	
+
 	private void registerTraits() {
 		TraitFactory tf = CitizensAPI.getTraitFactory();
-		
+
 		tf.registerTrait(TraitInfo.create(WarpTrait.class));
 	}
 
@@ -175,28 +178,56 @@ public class EvitaCoreMain extends JavaPlugin {
 		pm.registerEvents(new DeathListener(), this);
 		pm.registerEvents(new FarmListener(), this);
 		pm.registerEvents(new TablistNameUpdater(), this);
-		
+		pm.registerEvents(new VoteListener(), this);
+
 		registerPackets();
 	}
-	
+
 	private void registerPackets() {
 		ProtocolManager pm = ProtocolLibrary.getProtocolManager();
-		
-		pm.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.PLAYER_INFO) {
+
+		pm.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.NAMED_ENTITY_SPAWN) {
 			@Override
-		    public void onPacketSending(PacketEvent event) {
-		        if (event.getPacketType() == 
-		                PacketType.Play.Server.NAMED_SOUND_EFFECT) {
-		            event.setCancelled(true);
-		        }
-		    }
+			public void onPacketSending(PacketEvent event) {
+				if (event.getPacketType() == PacketType.Play.Server.NAMED_ENTITY_SPAWN) {
+					PacketContainer packet = event.getPacket();
+
+					if (packet.getUUIDs().read(0).toString().charAt(14) == '4') {
+						String receiverName = event.getPlayer().getName();
+						Entity entity = event.getPacket().getEntityModifier(event).read(0);
+						String approacherName = entity.getName();
+
+						try {
+							Resident receiver = TownyUniverse.getDataSource().getResident(receiverName);
+							Resident approacher = TownyUniverse.getDataSource().getResident(approacherName);
+							
+							if(receiver.hasNation() && approacher.hasNation()) {
+								if(receiver.getTown().getNation().equals(approacher.getTown().getNation())) {
+									entity.setCustomName(ChatColor.GREEN + approacherName);
+								} else if(receiver.isAlliedWith(approacher)) {
+									entity.setCustomName(ChatColor.LIGHT_PURPLE + approacherName);
+								} else if(receiver.getTown().getNation().getEnemies().contains(approacher.getTown().getNation())) {
+									entity.setCustomName(ChatColor.RED + approacherName);
+								} else {
+									entity.setCustomName(ChatColor.YELLOW + approacherName);
+								}
+							} else {
+								entity.setCustomName(ChatColor.YELLOW + approacherName);
+							}
+							event.getPacket().getEntityModifier(event).write(0, entity);
+						} catch (NotRegisteredException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
 		});
 	}
 
 	private void initCommands() {
 		getCommand("evitacore").setExecutor(new EvitaCoreCommand());
 		getCommand("item").setExecutor(new ItemCommand());
-		
+
 		AdminUtilCommand adminUtilCommand = new AdminUtilCommand();
 		UserUtilCommand userUtilCommand = new UserUtilCommand();
 
@@ -205,7 +236,6 @@ public class EvitaCoreMain extends JavaPlugin {
 		getCommand("call").setExecutor(adminUtilCommand);
 		getCommand("world").setExecutor(adminUtilCommand);
 		getCommand("skull").setExecutor(adminUtilCommand);
-		getCommand("restart").setExecutor(adminUtilCommand);
 		getCommand("say").setExecutor(adminUtilCommand);
 		getCommand("walkspeed").setExecutor(adminUtilCommand);
 		getCommand("flyspeed").setExecutor(adminUtilCommand);
@@ -217,6 +247,10 @@ public class EvitaCoreMain extends JavaPlugin {
 		getCommand("reply").setExecutor(userUtilCommand);
 		getCommand("playtime").setExecutor(userUtilCommand);
 		getCommand("ping").setExecutor(userUtilCommand);
+		getCommand("cafe").setExecutor(userUtilCommand);
+		getCommand("vote").setExecutor(userUtilCommand);
+		getCommand("discord").setExecutor(userUtilCommand);
+		getCommand("wiki").setExecutor(userUtilCommand);
 	}
 
 	private void scheduleReboot() {
@@ -276,9 +310,13 @@ public class EvitaCoreMain extends JavaPlugin {
 	public FileConfiguration getMessages() {
 		return messages;
 	}
-	
+
 	public FileConfiguration getWarp() {
 		return warp;
+	}
+
+	public FileConfiguration getItems() {
+		return items;
 	}
 
 	public DB getDB() {
@@ -296,10 +334,11 @@ public class EvitaCoreMain extends JavaPlugin {
 	public Channel getGeneralChannel() {
 		return generalChannel;
 	}
-	
+
 	public void reload() {
 		loadConfig();
-		
+
 		NoticeManager.getInstance().reload();
+		WarpManager.getInstance().reload();
 	}
 }

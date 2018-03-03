@@ -70,6 +70,11 @@ public class WarpManager implements Listener {
 		return warpGUI;
 	}
 	
+	public void reload() {
+		warps.clear();
+		loadWarps();
+	}
+	
 	@EventHandler
 	public void onClick(InventoryClickEvent e) {
 		if(e.getInventory().equals(warpGUI)) {

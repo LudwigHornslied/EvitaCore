@@ -97,6 +97,8 @@ public class PlayManager implements Listener {
 					+ "';");
 			refreshTimes.put(player, currentTime);
 		}
+		
+		rs.close();
 	}
 
 	// Listeners
@@ -131,5 +133,9 @@ public class PlayManager implements Listener {
 		if(e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock().hasMetadata("warp")) {
 			e.getPlayer().teleport((Location) e.getClickedBlock().getMetadata("warp").get(0).value()); 
 		}
+	}
+	
+	public void getSpawnAC() {
+		
 	}
 }

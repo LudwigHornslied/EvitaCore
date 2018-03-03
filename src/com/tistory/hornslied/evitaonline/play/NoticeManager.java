@@ -89,7 +89,6 @@ public class NoticeManager {
 		messages.clear();
 		loadMessages();
 		
-		messageUpdater.runTaskTimer(EvitaCoreMain.getInstance(), 0, 300);
-		messageSender.runTaskTimer(EvitaCoreMain.getInstance(), 0, 20);
+		init();
 	}
 }

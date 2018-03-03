@@ -1,10 +1,5 @@
 package com.tistory.hornslied.evitaonline.commands;
 
-import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,12 +8,10 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import com.tistory.hornslied.evitaonline.core.EvitaCoreMain;
 import com.tistory.hornslied.evitaonline.utils.Resources;
 
 public class AdminUtilCommand implements CommandExecutor {
@@ -118,31 +111,6 @@ public class AdminUtilCommand implements CommandExecutor {
 			((Player) sender).teleport(world.getSpawnLocation());
 			sender.sendMessage(Resources.tagServer + ChatColor.AQUA + world.getName() + " 월드로 이동하였습니다.");
 			break;
-		case "restart":
-			FileConfiguration config = EvitaCoreMain.getInstance().getConfig();
-			
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-			    public void run() {
-			      List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
-			      List<String> command = new ArrayList<String>();
-			      command.add(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java.exe");
-			      for(int i = 0; i < args.size(); i++) {
-			        command.add(args.get(i));
-			      }
-			      command.add("-jar");
-			      command.add("-Xms" + config.getString("ram.minimum") + "M");
-			      command.add("-Xmx" + config.getString("ram.maximum") + "M");
-			      command.add(new File(Bukkit.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getAbsolutePath());
-			      try {
-			        new ProcessBuilder(command).start();
-			      }
-			      catch(Exception e) {
-			        e.printStackTrace();
-			      }
-			    }
-			  });
-			  Bukkit.shutdown();
-			  break;
 		case "say":
 			if (args.length < 1) {
 				sender.sendMessage(Resources.tagServer + ChatColor.RED + "명령어 사용 방법: /알림 <메시지>");

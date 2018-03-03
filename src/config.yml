@@ -1,6 +1,5 @@
-ram:
-  minimum: 1024
-  maximum: 1024
+address: 'evita.mcgo.kr'
+cafe: 'http://cafe.naver.com/evitaonline'
 db:
   user: 'root'
   password: '189#$xD587%'
@@ -8,9 +7,21 @@ db:
   port: '3306'
   dbname: 'evita'
   useSSL: false
+motd:
+  default:
+    1: ''
+    2: ''
+  maintenance:
+    1:
+    2:
 globalchannel: '전체'
 worlds:
   - Archive
   - Head World
 mineworlds: Evita2
 acrespawn: false
+spawnac:
+- Tyrus
+- Ostia
+- Primot
+- Memphis
